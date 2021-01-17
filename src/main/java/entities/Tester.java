@@ -20,13 +20,18 @@ public class Tester {
         EntityManagerFactory emf = EMF_Creator.createEntityManagerFactory();
         EntityManager em = emf.createEntityManager();
         
-        One one = new One(new ArrayList(), "Test1");
-        Many many = new Many("Test1");
+//        One one = new One(new ArrayList(), "Test1");
+//        Many many = new Many("Test1");
+//        one.addMany(many);
         
-        one.addMany(many);
+        Sport testSport = new Sport("testSport", "test");
+        SportTeam testTeam = new SportTeam(10.0, "testTeam", 10, 11);
+        
+        testSport.addTeam(testTeam);
+        
 
         em.getTransaction().begin();
-        em.persist(one);
+        em.persist(testSport);
         em.getTransaction().commit();
         
     }

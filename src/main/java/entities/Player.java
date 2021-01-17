@@ -5,11 +5,18 @@
  */
 package entities;
 
+import dtos.PlayerDTO;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 
 /**
  *
@@ -26,8 +33,52 @@ public class Player implements Serializable {
     private String email;
     private int phone;
     private int age;
+    
+    
+//@JoinTable(name = "memberInfo", joinColumns = {
+//    @JoinColumn(name = "user_name", referencedColumnName = "user_name")}, inverseJoinColumns = {
+//    @JoinColumn(name = "role_name", referencedColumnName = "role_name")})
+    @ManyToMany
+    private List<SportTeam> teams;
 
     public Player() {
+    }
+
+    public Player(String name, String email, int phone, int age) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.age = age;
+        this.teams = new ArrayList();
+    }
+    
+    public Player(PlayerDTO dto) {
+        this.name = dto.getName();
+        this.email = dto.getEmail();
+        this.phone = dto.getPhone();
+        this.age = dto.getAge();
+        this.teams = new ArrayList();
+    }
+    
+    
+
+    public List<SportTeam> getTeams() {
+        return teams;
+    }
+
+    public void setTeams(List<SportTeam> teams) {
+        this.teams = teams;
+    }
+
+    public void addTeam(SportTeam team) {
+        this.teams.add(team);
+        
+    }
+
+    public void removeTeam(SportTeam team) {
+        if (team != null) {
+            this.teams.remove(team);
+        }
     }
 
     public String getName() {
@@ -61,8 +112,6 @@ public class Player implements Serializable {
     public void setAge(int age) {
         this.age = age;
     }
-    
-    
 
     public int getId() {
         return id;
@@ -96,5 +145,5 @@ public class Player implements Serializable {
     public String toString() {
         return "entities.Player[ id=" + id + " ]";
     }
-    
+
 }

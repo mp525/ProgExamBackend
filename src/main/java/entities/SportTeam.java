@@ -7,10 +7,13 @@ package entities;
 
 import dtos.SportTeamDTO;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 
@@ -33,6 +36,9 @@ public class SportTeam implements Serializable {
     
     @ManyToOne
     private Sport sport;
+    
+    @ManyToMany(mappedBy = "teams")
+    private List<Player> players;
 
     public SportTeam() {
     }
@@ -42,7 +48,7 @@ public class SportTeam implements Serializable {
         this.teamName = teamName;
         this.minAge = minAge;
         this.maxAge = maxAge;
-       
+        this.players = new ArrayList();
     }
     
     public SportTeam(SportTeamDTO dto) {
@@ -52,6 +58,23 @@ public class SportTeam implements Serializable {
         this.maxAge = dto.getMaxAge();
         
     }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(List<Player> players) {
+        this.players = players;
+    }
+    
+    public void addPlayer(Player player){
+        this.players.add(player);
+          if (player != null) {
+            player.getTeams().add(this);
+        }
+    }
+    
+    
     
     public Sport getSport() {
         return sport;

@@ -9,6 +9,7 @@ import dtos.SportDTO;
 import dtos.SportTeamDTO;
 import entities.Sport;
 import entities.SportTeam;
+import errorhandling.MissingInputException;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -79,14 +80,15 @@ public class SportFacadeTest {
      * Test of addSport method, of class SportFacade.
      */
     @Test
-    public void testAddSport() {
+    public void testAddSport() throws MissingInputException {
         SportDTO dto = new SportDTO(s2);
+        System.out.println(dto.getName());
         SportDTO result = facade.addSport(dto);
         assertEquals(dto.getName(), result.getName());
     }
     
     @Test
-    public void testAddSportTeam() {
+    public void testAddSportTeam() throws MissingInputException {
         SportTeamDTO dto = new SportTeamDTO(t2);
         SportTeamDTO result = facade.addSportTeam(dto);
         assertEquals(dto.getTeamName(), result.getTeamName());
@@ -113,7 +115,7 @@ public class SportFacadeTest {
     }
     
     @Test
-    public void testEditTeams(){
+    public void testEditTeams() throws MissingInputException{
         SportTeamDTO dto = new SportTeamDTO(t1);
         dto.setTeamName("editedTeamName");
         SportTeamDTO dto2 = facade.editSportTeam(dto);

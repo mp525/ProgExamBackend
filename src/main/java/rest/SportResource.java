@@ -7,8 +7,10 @@ package rest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dtos.PlayerDTO;
 import dtos.SportDTO;
 import dtos.SportTeamDTO;
+import errorhandling.MissingInputException;
 import facades.SportFacade;
 import java.util.List;
 import javax.annotation.security.PermitAll;
@@ -80,12 +82,20 @@ public class SportResource {
         return GSON.toJson(list);
     }
     
+    @Path("all/players")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String allPlayers(){
+        List<PlayerDTO> list = facade.allPlayers();
+        return GSON.toJson(list);
+    }
+    
     
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed("admin")
-    public String addSport(String dto){
+    public String addSport(String dto) throws MissingInputException{
         SportDTO toAdd = GSON.fromJson(dto, SportDTO.class);
         SportDTO retVal = facade.addSport(toAdd);
         return GSON.toJson(retVal);
@@ -96,10 +106,21 @@ public class SportResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @PermitAll()
-    public String addTeam(String dto){
+    public String addTeam(String dto) throws MissingInputException{
         SportTeamDTO toAdd = GSON.fromJson(dto, SportTeamDTO.class);
         SportTeamDTO retVal = facade.addSportTeam(toAdd);
         return GSON.toJson(retVal);
+    }
+    
+    @Path("team/addPlayer")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("admin")
+    public String addToTeam(String dto) throws MissingInputException{
+        PlayerDTO toAdd = GSON.fromJson(dto, PlayerDTO.class);
+        facade.addPlayerToTeam(toAdd);
+        return GSON.toJson("Succes!");
     }
     
     @Path("team")
@@ -107,7 +128,7 @@ public class SportResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed("admin")
-    public String editSportTeam(String dto){
+    public String editSportTeam(String dto) throws MissingInputException{
         SportTeamDTO toEdit = GSON.fromJson(dto, SportTeamDTO.class);
        
         SportTeamDTO retVal = facade.editSportTeam(toEdit);
@@ -124,5 +145,16 @@ public class SportResource {
         return GSON.toJson(deleted);
     }
     
+    
+    @Path("player")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("admin")
+    public String addPlayer(String dto){
+        PlayerDTO toAdd = GSON.fromJson(dto, PlayerDTO.class);
+        PlayerDTO retVal = facade.addPlayer(toAdd);
+        return GSON.toJson(retVal);
+    }
    
 }

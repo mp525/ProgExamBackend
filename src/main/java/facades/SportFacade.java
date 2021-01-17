@@ -5,10 +5,13 @@
  */
 package facades;
 
+import dtos.PlayerDTO;
 import dtos.SportDTO;
 import dtos.SportTeamDTO;
+import entities.Player;
 import entities.Sport;
 import entities.SportTeam;
+import errorhandling.MissingInputException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -33,7 +36,11 @@ public class SportFacade {
         return instance;
     }
 
-    public SportDTO addSport(SportDTO dto) {
+    public SportDTO addSport(SportDTO dto) throws MissingInputException {
+        if(dto.getName().length() < 2 ||  dto.getName() == null ){
+            throw new MissingInputException("Name of sport can't be below 2 characters!");
+        }
+        
         EntityManager em = emf.createEntityManager();
 
         Sport sport = new Sport(dto);
@@ -45,7 +52,11 @@ public class SportFacade {
         return dto;
     }
 
-    public SportTeamDTO addSportTeam(SportTeamDTO dto) {
+    public SportTeamDTO addSportTeam(SportTeamDTO dto) throws MissingInputException {
+        if(dto.getTeamName().length() < 1){
+            throw new MissingInputException("Name of team can't be below 1 character!");
+        }
+        
         EntityManager em = emf.createEntityManager();
 
         try {
@@ -53,7 +64,12 @@ public class SportFacade {
             TypedQuery<Sport> query = em.createQuery("Select s from Sport s where s.name = :name", Sport.class);
             query.setParameter("name", dto.getSportName());
             List<Sport> list = query.getResultList();
-            Sport sport = list.get(0);
+            Sport sport;
+            try{
+            sport = list.get(0);
+            }catch(ArrayIndexOutOfBoundsException e){
+                throw new MissingInputException("Sport does not exist, or was not inputtet!");
+            }
             sport.addTeam(team);
             team.setSport(sport);
 
@@ -94,36 +110,44 @@ public class SportFacade {
         return retList;
     }
 
-    public SportTeamDTO editSportTeam(SportTeamDTO dto) {
+    public SportTeamDTO editSportTeam(SportTeamDTO dto) throws MissingInputException {
+        if(dto.getTeamName().length() < 1 || dto.getTeamName() == null){
+            throw new MissingInputException("Name of team can't be below 1 character!");
+        }
         EntityManager em = emf.createEntityManager();
         SportTeam team = em.find(SportTeam.class, dto.getId());
         try {
-            
+
             TypedQuery<Sport> query = em.createQuery("Select s from Sport s where s.name = :name", Sport.class);
             query.setParameter("name", dto.getSportName());
             List<Sport> list = query.getResultList();
-            Sport sport = list.get(0);
+            Sport sport;
+             try{
+            sport = list.get(0);
+            }catch(ArrayIndexOutOfBoundsException e){
+                throw new MissingInputException("Sport does not exist, or was not inputtet!");
+            }
             team.getSport().removeTeam(team);
             sport.addTeam(team);
-            
+
             em.getTransaction().begin();
             team.setSport(sport);
             team.setTeamName(dto.getTeamName());
             team.setMinAge(dto.getMinAge());
             team.setMaxAge(dto.getMaxAge());
             team.setPricePerYear(dto.getPricePerYear());
-            
+
             em.merge(team);
             em.getTransaction().commit();
-            
+
             SportTeamDTO retDTO = new SportTeamDTO(team);
             return retDTO;
         } finally {
             em.close();
         }
     }
-    
-     public void deleteSportTeam(int nr) {
+
+    public void deleteSportTeam(int nr) {
 
         EntityManager em = emf.createEntityManager();
         SportTeam team = em.find(SportTeam.class, nr);
@@ -135,6 +159,57 @@ public class SportFacade {
         } finally {
             em.close();
         }
+    }
+
+    public PlayerDTO addPlayer(PlayerDTO dto) {
+        EntityManager em = emf.createEntityManager();
+        Player player = new Player(dto);
+        TypedQuery<SportTeam> query = em.createQuery("Select s from SportTeam s where s.teamName = :name", SportTeam.class);
+            query.setParameter("name", dto.getTeamName());
+            List<SportTeam> list = query.getResultList();
+            SportTeam team = list.get(0);
+            team.addPlayer(player);
+            
+            em.getTransaction().begin();
+            em.persist(player);
+            em.getTransaction().commit();
+            
+            PlayerDTO retDTO = new PlayerDTO(player);
+        
+        return retDTO;
+    }
+    
+    public List<PlayerDTO> allPlayers() {
+        EntityManager em = emf.createEntityManager();
+        List<PlayerDTO> retList = new ArrayList();
+
+        TypedQuery<Player> query = em.createQuery("Select p from Player p", Player.class);
+        List<Player> list = query.getResultList();
+
+        for (Player p : list) {
+            retList.add(new PlayerDTO(p));
+        }
+
+        return retList;
+    }
+    
+    public void addPlayerToTeam(PlayerDTO dto){
+        EntityManager em = emf.createEntityManager();
+        TypedQuery<Player> query = em.createQuery("Select p from Player p where p.email = :email", Player.class);
+            query.setParameter("email", dto.getEmail());
+            List<Player> list = query.getResultList();
+            Player p = list.get(0);
+        
+        TypedQuery<SportTeam> query2 = em.createQuery("Select s from SportTeam s where s.teamName = :name", SportTeam.class);
+            query2.setParameter("name", dto.getTeamName());
+            List<SportTeam> list2 = query2.getResultList();
+            SportTeam team = list2.get(0);
+            team.addPlayer(p);
+            
+            em.getTransaction().begin();
+            em.merge(team);
+            em.getTransaction().commit();
+            
     }
 
 }

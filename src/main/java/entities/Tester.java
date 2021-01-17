@@ -26,11 +26,17 @@ public class Tester {
         
         Sport testSport = new Sport("testSport", "test");
         SportTeam testTeam = new SportTeam(10.0, "testTeam", 10, 11);
+        Player p1 = new Player("navn1", "email1", 12121212, 20);
+        Player p2 = new Player("navn2", "email2", 21212121, 20);
         
         testSport.addTeam(testTeam);
         
+        testTeam.addPlayer(p1);
+        testTeam.addPlayer(p2);
 
         em.getTransaction().begin();
+        em.persist(p1);
+        em.persist(p2);
         em.persist(testSport);
         em.getTransaction().commit();
         

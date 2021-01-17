@@ -34,8 +34,8 @@ public class SetupTestUsers {
     admin.addRole(adminRole);
     both.addRole(userRole);
     both.addRole(adminRole);
-    em.persist(userRole);
-    em.persist(adminRole);
+    //em.persist(userRole);
+    //em.persist(adminRole);
     em.persist(user);
     em.persist(admin);
     em.persist(both);
